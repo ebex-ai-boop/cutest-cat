@@ -13,9 +13,18 @@ import sys
 def main() -> int:
     here = os.path.dirname(os.path.abspath(__file__))
     src = os.path.join(here, "entry.png")
+    if not os.path.isfile(src):
+        print("entry.png not found next to main.py", file=sys.stderr)
+        return 1
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
     os.makedirs(out_dir, exist_ok=True)
-    shutil.copyfile(src, os.path.join(out_dir, "entry.png"))
+    dst = os.path.join(out_dir, "entry.png")
+    shutil.copyfile(src, dst)
+    # Confirm the copy is complete: same size as the source, so a
+    # truncated write can never pass silently.
+    if os.path.getsize(dst) != os.path.getsize(src):
+        print("entry.png copy is incomplete", file=sys.stderr)
+        return 1
     return 0
 
 
